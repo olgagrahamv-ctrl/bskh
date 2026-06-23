@@ -1,0 +1,880 @@
+<!--
+  BSKH — Pure HTML/CSS, no JavaScript
+  Paste directly into SharePoint Embed web part code box.
+  Navigation uses hidden checkboxes + CSS :checked selectors.
+-->
+<style>
+/* ── Reset & scope ── */
+#bskh2{font-family:'Segoe UI',system-ui,sans-serif;color:#323130;line-height:1.5;background:#FAF9F8;}
+#bskh2 *{box-sizing:border-box;margin:0;padding:0;}
+#bskh2 a{color:#0078D4;text-decoration:none;}
+#bskh2 a:hover{text-decoration:underline;}
+#bskh2 label{cursor:pointer;}
+
+/* ── Hide all radio inputs ── */
+#bskh2 input[type=radio]{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+
+/* ── PAGE SYSTEM ──
+   One radio group "nav" controls which page is visible.
+   Default: home is shown. ── */
+#bskh2 .page{display:none;}
+#bskh2 #r-home:checked ~ #bskh2-inner #pg-home,
+#bskh2 #r-apps:checked ~ #bskh2-inner #pg-apps,
+#bskh2 #r-kb:checked   ~ #bskh2-inner #pg-kb,
+#bskh2 #r-search:checked ~ #bskh2-inner #pg-search{ display:block; }
+/* Default page when nothing checked → show home */
+#bskh2 #pg-home{ display:block; }
+#bskh2 #r-home:checked ~ #bskh2-inner #pg-home,
+#bskh2 #r-apps:checked ~ #bskh2-inner #pg-home,
+#bskh2 #r-kb:checked   ~ #bskh2-inner #pg-home,
+#bskh2 #r-search:checked ~ #bskh2-inner #pg-home{ display:none; }
+#bskh2 #r-home:checked   ~ #bskh2-inner #pg-home{ display:block; }
+
+/* ── APP DETAIL SYSTEM ──
+   Radio group "det" controls which app detail is open ── */
+#bskh2 .det-panel{display:none;}
+#bskh2 #d1:checked ~ #bskh2-inner #det1,
+#bskh2 #d2:checked ~ #bskh2-inner #det2,
+#bskh2 #d3:checked ~ #bskh2-inner #det3{ display:block; }
+
+/* ── ARTICLE SYSTEM ── */
+#bskh2 .art-panel{display:none;}
+#bskh2 #a1:checked ~ #bskh2-inner #art1,
+#bskh2 #a2:checked ~ #bskh2-inner #art2,
+#bskh2 #a3:checked ~ #bskh2-inner #art3,
+#bskh2 #a4:checked ~ #bskh2-inner #art4{ display:block; }
+
+/* ── NAV ── */
+#bskh2 .nav{background:#0078D4;height:48px;display:flex;align-items:center;padding:0 24px;gap:0;box-shadow:0 2px 4px rgba(0,0,0,0.18);position:sticky;top:0;z-index:100;}
+#bskh2 .brand{color:#fff;font-weight:700;font-size:15px;margin-right:32px;display:flex;align-items:center;gap:8px;}
+#bskh2 .nav label{color:rgba(255,255,255,0.85);padding:0 14px;font-size:14px;height:48px;display:flex;align-items:center;transition:background 0.15s;white-space:nowrap;}
+#bskh2 .nav label:hover{color:#fff;background:rgba(255,255,255,0.1);}
+#bskh2 #r-home:checked   ~ #bskh2-inner .nav label[for=r-home],
+#bskh2 #r-apps:checked   ~ #bskh2-inner .nav label[for=r-apps],
+#bskh2 #r-kb:checked     ~ #bskh2-inner .nav label[for=r-kb],
+#bskh2 #r-search:checked ~ #bskh2-inner .nav label[for=r-search]{color:#fff;background:rgba(255,255,255,0.18);border-bottom:3px solid #fff;}
+#bskh2 .nav-right{margin-left:auto;}
+
+/* ── HERO ── */
+#bskh2 .hero{background:linear-gradient(135deg,#0078D4 0%,#004C87 55%,#002F5C 100%);color:#fff;padding:56px 48px 48px;position:relative;overflow:hidden;}
+#bskh2 .hero-label{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:0.7;margin-bottom:12px;}
+#bskh2 .hero-title{font-size:clamp(28px,4vw,40px);font-weight:300;letter-spacing:-0.5px;margin-bottom:8px;line-height:1.2;}
+#bskh2 .hero-title strong{font-weight:700;}
+#bskh2 .hero-sub{font-size:16px;opacity:0.85;max-width:540px;margin-bottom:36px;line-height:1.6;}
+#bskh2 .stats{display:flex;margin-top:32px;background:rgba(255,255,255,0.12);border-radius:8px;overflow:hidden;max-width:600px;}
+#bskh2 .stat{flex:1;text-align:center;padding:14px 8px;border-right:1px solid rgba(255,255,255,0.2);}
+#bskh2 .stat:last-child{border-right:none;}
+#bskh2 .stat-n{font-size:26px;font-weight:700;display:block;}
+#bskh2 .stat-l{font-size:12px;opacity:0.75;display:block;margin-top:2px;}
+
+/* ── HERO SEARCH (CSS only — visual only, links to search page) ── */
+#bskh2 .hero-search{display:flex;gap:8px;max-width:600px;margin-bottom:0;}
+#bskh2 .hero-search-box{flex:1;padding:13px 16px 13px 46px;font-size:15px;font-family:inherit;border:2px solid transparent;border-radius:8px;background:rgba(255,255,255,0.96);color:#323130;outline:none;}
+#bskh2 .hero-search-wrap{position:relative;flex:1;}
+#bskh2 .hero-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;}
+#bskh2 .hero-search-btn{padding:13px 24px;background:#fff;color:#0078D4;border:none;border-radius:8px;font-size:14px;font-weight:700;white-space:nowrap;}
+
+/* ── CONTENT ── */
+#bskh2 .content{max-width:1200px;margin:0 auto;padding:36px 24px;}
+#bskh2 .two-col{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
+@media(max-width:900px){#bskh2 .two-col{grid-template-columns:1fr;}}
+#bskh2 .section{margin-bottom:44px;}
+#bskh2 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+#bskh2 .section-title{font-size:20px;font-weight:600;color:#323130;display:flex;align-items:center;gap:10px;}
+#bskh2 .view-all{background:none;border:1.5px solid #0078D4;color:#0078D4;padding:6px 16px;border-radius:4px;font-size:13px;font-weight:600;}
+#bskh2 .view-all:hover{background:#EFF6FF;}
+
+/* ── APP CARDS ── */
+#bskh2 .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+#bskh2 .app-card{background:#fff;border-radius:8px;border:1px solid #E1DFDD;padding:22px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:box-shadow 0.2s,transform 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+#bskh2 .app-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13);transform:translateY(-2px);}
+#bskh2 .card-hd{display:flex;align-items:flex-start;gap:14px;}
+#bskh2 .card-icon{width:52px;height:52px;border-radius:8px;background:#FAF9F8;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid #E1DFDD;}
+#bskh2 .card-tg{flex:1;min-width:0;}
+#bskh2 .card-title{font-size:16px;font-weight:700;color:#323130;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#bskh2 .card-desc{font-size:13px;color:#605E5C;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+#bskh2 .card-owners{display:flex;flex-direction:column;gap:5px;}
+#bskh2 .owner-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#605E5C;}
+#bskh2 .owner-lbl{font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#A19F9D;min-width:62px;}
+#bskh2 .card-ft{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #F3F2F1;margin-top:auto;}
+#bskh2 .card-ts{font-size:11px;color:#A19F9D;}
+
+/* ── CHIPS & BADGES ── */
+#bskh2 .chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;}
+#bskh2 .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}
+#bskh2 .cc-student{background:#EFF6FF;color:#1E40AF;}
+#bskh2 .cc-analytics{background:#FFF7F0;color:#9A3412;}
+#bskh2 .cc-facilities{background:#F5F0FF;color:#6B21A8;}
+#bskh2 .cc-finance{background:#F0FFF4;color:#166534;}
+#bskh2 .cc-hr{background:#FFF0F6;color:#9C0071;}
+#bskh2 .cc-infra{background:#F0F9FF;color:#0369A1;}
+#bskh2 .bs-active{background:#DFF6DD;color:#107C10;}
+#bskh2 .bs-review{background:#FFF4CE;color:#8A6914;}
+#bskh2 .bs-inactive{background:#FDE7E9;color:#A4262C;}
+#bskh2 .kc-howto{background:#DFF6DD;color:#107C10;}
+#bskh2 .kc-trouble{background:#FDE7E9;color:#A4262C;}
+#bskh2 .kc-news{background:#FFF4CE;color:#8A6914;}
+
+/* ── SIDEBAR ── */
+#bskh2 .sidebar-card{background:#fff;border-radius:8px;border:1px solid #E1DFDD;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:16px;}
+#bskh2 .sidebar-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#A19F9D;margin-bottom:16px;}
+#bskh2 .qlink{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:#0078D4;border-bottom:1px solid #F3F2F1;}
+#bskh2 .qlink:last-child{border-bottom:none;}
+#bskh2 .qlink::before{content:'→';font-weight:700;opacity:0.6;}
+#bskh2 .contact-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #F3F2F1;}
+#bskh2 .contact-row:last-child{border-bottom:none;}
+#bskh2 .avatar{width:38px;height:38px;border-radius:50%;background:#0078D4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+#bskh2 .cname{font-size:14px;font-weight:600;margin-bottom:2px;}
+#bskh2 .crole{font-size:12px;color:#605E5C;margin-bottom:3px;}
+#bskh2 .cemail{font-size:12px;color:#0078D4;}
+#bskh2 .esc-badge{background:#FFF4CE;color:#8A6914;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;margin-left:6px;}
+#bskh2 .callout{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px 16px;font-size:13px;color:#1E40AF;display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
+
+/* ── CAT CARDS ── */
+#bskh2 .cat-grid{display:flex;gap:10px;flex-wrap:wrap;}
+#bskh2 .cat-card{background:#fff;border:1px solid #E1DFDD;border-radius:8px;padding:14px 18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:150px;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:box-shadow 0.15s;}
+#bskh2 .cat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13);}
+#bskh2 .cat-n{font-size:26px;font-weight:700;color:#0078D4;}
+#bskh2 .cat-s{font-size:12px;color:#A19F9D;}
+
+/* ── POPULAR ── */
+#bskh2 .pop-row{background:#fff;border:1px solid #E1DFDD;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:box-shadow 0.15s;margin-bottom:8px;}
+#bskh2 .pop-row:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13);}
+#bskh2 .pop-n{font-size:18px;font-weight:700;color:#A19F9D;min-width:22px;}
+#bskh2 .pop-icon{font-size:22px;}
+#bskh2 .pop-name{flex:1;font-weight:600;font-size:14px;}
+
+/* ── KB CARDS ── */
+#bskh2 .kb-list{display:flex;flex-direction:column;gap:12px;}
+#bskh2 .kb-card{background:#fff;border:1px solid #E1DFDD;border-radius:8px;padding:20px 22px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:box-shadow 0.15s;display:flex;flex-direction:column;gap:10px;}
+#bskh2 .kb-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13);}
+#bskh2 .kb-title{font-size:15px;font-weight:600;color:#0078D4;}
+#bskh2 .kb-meta{display:flex;gap:18px;font-size:12px;color:#A19F9D;flex-wrap:wrap;align-items:center;}
+#bskh2 .tag-list{display:flex;gap:6px;flex-wrap:wrap;}
+#bskh2 .tag{background:#F3F2F1;color:#605E5C;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;}
+
+/* ── PAGE HEADERS ── */
+#bskh2 .page-title{font-size:24px;font-weight:700;margin-bottom:6px;}
+#bskh2 .page-sub{font-size:14px;color:#605E5C;margin-bottom:28px;}
+
+/* ── DETAIL HERO ── */
+#bskh2 .det-hero{background:linear-gradient(135deg,#0078D4 0%,#004C87 100%);color:#fff;padding:36px 48px;}
+#bskh2 .back-btn{background:none;border:1.5px solid rgba(255,255,255,0.5);color:#fff;padding:6px 14px;border-radius:4px;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;}
+#bskh2 .back-btn:hover{background:rgba(255,255,255,0.12);}
+#bskh2 .det-app-hd{display:flex;align-items:center;gap:18px;}
+#bskh2 .det-icon{width:68px;height:68px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;}
+#bskh2 .det-title{font-size:30px;font-weight:700;margin-bottom:6px;}
+#bskh2 .det-desc{font-size:14px;opacity:0.85;max-width:640px;line-height:1.55;}
+#bskh2 .det-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:13px;opacity:0.9;}
+
+/* ── TABS (CSS only — radio group per detail panel) ── */
+#bskh2 .tab-inputs{position:absolute;opacity:0;width:0;height:0;}
+#bskh2 .tab-bar{background:#fff;border-bottom:1px solid #E1DFDD;display:flex;padding:0 48px;overflow-x:auto;}
+#bskh2 .tab-bar label{padding:14px 20px;font-size:14px;cursor:pointer;border-bottom:3px solid transparent;color:#605E5C;font-weight:500;white-space:nowrap;transition:all 0.15s;}
+#bskh2 .tab-bar label:hover{color:#323130;}
+#bskh2 .tab-content{display:none;}
+
+/* StarRez tabs */
+#bskh2 #t1a:checked ~ .det-tabs .tab-bar label[for=t1a],
+#bskh2 #t1b:checked ~ .det-tabs .tab-bar label[for=t1b],
+#bskh2 #t1c:checked ~ .det-tabs .tab-bar label[for=t1c],
+#bskh2 #t1d:checked ~ .det-tabs .tab-bar label[for=t1d]{color:#0078D4;border-bottom-color:#0078D4;font-weight:700;}
+#bskh2 #t1a:checked ~ .det-tabs #tc1a,
+#bskh2 #t1b:checked ~ .det-tabs #tc1b,
+#bskh2 #t1c:checked ~ .det-tabs #tc1c,
+#bskh2 #t1d:checked ~ .det-tabs #tc1d{display:block;}
+#bskh2 #tc1a{display:block;}
+#bskh2 #t1b:checked ~ .det-tabs #tc1a,
+#bskh2 #t1c:checked ~ .det-tabs #tc1a,
+#bskh2 #t1d:checked ~ .det-tabs #tc1a{display:none;}
+/* Evolution tabs */
+#bskh2 #t2a:checked ~ .det-tabs .tab-bar label[for=t2a],
+#bskh2 #t2b:checked ~ .det-tabs .tab-bar label[for=t2b],
+#bskh2 #t2c:checked ~ .det-tabs .tab-bar label[for=t2c],
+#bskh2 #t2d:checked ~ .det-tabs .tab-bar label[for=t2d]{color:#0078D4;border-bottom-color:#0078D4;font-weight:700;}
+#bskh2 #t2a:checked ~ .det-tabs #tc2a,
+#bskh2 #t2b:checked ~ .det-tabs #tc2b,
+#bskh2 #t2c:checked ~ .det-tabs #tc2c,
+#bskh2 #t2d:checked ~ .det-tabs #tc2d{display:block;}
+#bskh2 #tc2a{display:block;}
+#bskh2 #t2b:checked ~ .det-tabs #tc2a,
+#bskh2 #t2c:checked ~ .det-tabs #tc2a,
+#bskh2 #t2d:checked ~ .det-tabs #tc2a{display:none;}
+/* QlikView tabs */
+#bskh2 #t3a:checked ~ .det-tabs .tab-bar label[for=t3a],
+#bskh2 #t3b:checked ~ .det-tabs .tab-bar label[for=t3b],
+#bskh2 #t3c:checked ~ .det-tabs .tab-bar label[for=t3c],
+#bskh2 #t3d:checked ~ .det-tabs .tab-bar label[for=t3d]{color:#0078D4;border-bottom-color:#0078D4;font-weight:700;}
+#bskh2 #t3a:checked ~ .det-tabs #tc3a,
+#bskh2 #t3b:checked ~ .det-tabs #tc3b,
+#bskh2 #t3c:checked ~ .det-tabs #tc3c,
+#bskh2 #t3d:checked ~ .det-tabs #tc3d{display:block;}
+#bskh2 #tc3a{display:block;}
+#bskh2 #t3b:checked ~ .det-tabs #tc3a,
+#bskh2 #t3c:checked ~ .det-tabs #tc3a,
+#bskh2 #t3d:checked ~ .det-tabs #tc3a{display:none;}
+
+/* ── DETAIL CONTENT CARDS ── */
+#bskh2 .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:24px;}
+#bskh2 .info-block{background:#F9F8F7;border:1px solid #E1DFDD;border-radius:8px;padding:14px 16px;}
+#bskh2 .info-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#A19F9D;margin-bottom:4px;}
+#bskh2 .info-val{font-size:14px;font-weight:500;color:#323130;}
+#bskh2 .ccard{background:#fff;border:1px solid #E1DFDD;border-radius:8px;padding:22px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:16px;}
+#bskh2 .ccard-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#A19F9D;margin-bottom:12px;}
+#bskh2 .ccard p{font-size:14px;line-height:1.65;color:#323130;}
+#bskh2 .warn-box{background:#FFF4CE;border:1px solid #F7E195;border-radius:8px;padding:16px 20px;margin-bottom:16px;}
+#bskh2 .warn-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#7A5B00;margin-bottom:8px;}
+#bskh2 .warn-box p{font-size:14px;line-height:1.6;color:#5D4800;}
+#bskh2 .two-col-d{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){#bskh2 .two-col-d{grid-template-columns:1fr;}}
+#bskh2 .ulink{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #F3F2F1;font-size:14px;color:#0078D4;}
+#bskh2 .ulink:last-child{border-bottom:none;}
+#bskh2 .ulink::before{content:'🔗';}
+#bskh2 .ulink:hover{text-decoration:underline;}
+#bskh2 .change-entry{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid #F3F2F1;}
+#bskh2 .change-entry:last-child{border-bottom:none;}
+#bskh2 .ch-date{min-width:80px;font-size:12px;color:#A19F9D;font-weight:600;padding-top:2px;}
+#bskh2 .ch-title{font-size:14px;font-weight:600;margin-bottom:5px;}
+#bskh2 .ch-badges{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
+#bskh2 .ch-detail{font-size:13px;color:#605E5C;line-height:1.5;}
+#bskh2 .type-b{background:#EFF6FF;color:#1E40AF;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+#bskh2 .imp-low{background:#DFF6DD;color:#107C10;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+#bskh2 .imp-med{background:#FFF4CE;color:#8A6914;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+#bskh2 .imp-high{background:#FDE7E9;color:#A4262C;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+
+/* ── ARTICLE BODY ── */
+#bskh2 .back-btn2{background:none;border:1.5px solid #0078D4;color:#0078D4;padding:6px 14px;border-radius:4px;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;}
+#bskh2 .back-btn2:hover{background:#EFF6FF;}
+#bskh2 .article{background:#fff;border:1px solid #E1DFDD;border-radius:8px;padding:30px 36px;font-size:15px;line-height:1.75;color:#323130;max-width:800px;}
+#bskh2 .article h2{font-size:18px;font-weight:700;margin:24px 0 10px;}
+#bskh2 .article h2:first-child{margin-top:0;}
+#bskh2 .article p{margin-bottom:14px;}
+#bskh2 .article ul,#bskh2 .article ol{padding-left:20px;margin-bottom:14px;}
+#bskh2 .article li{margin-bottom:6px;}
+#bskh2 .article strong{font-weight:700;}
+
+/* ── DOCS BTN ── */
+#bskh2 .docs-btn{display:inline-flex;align-items:center;gap:8px;background:#0078D4;color:#fff;padding:10px 22px;border-radius:4px;font-size:14px;font-weight:600;text-decoration:none;border:none;}
+#bskh2 .docs-btn:hover{background:#004C87;color:#fff;text-decoration:none;}
+
+/* ── FOOTER ── */
+#bskh2 .footer{background:#F3F2F1;border-top:1px solid #E1DFDD;padding:24px 48px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#A19F9D;margin-top:48px;}
+</style>
+
+<div id="bskh2">
+
+<!-- ══ PAGE RADIO GROUP ══ -->
+<input type="radio" name="nav" id="r-home" checked>
+<input type="radio" name="nav" id="r-apps">
+<input type="radio" name="nav" id="r-kb">
+<input type="radio" name="nav" id="r-search">
+
+<!-- ══ APP DETAIL RADIO GROUP ══ -->
+<input type="radio" name="det" id="d0" checked>
+<input type="radio" name="det" id="d1">
+<input type="radio" name="det" id="d2">
+<input type="radio" name="det" id="d3">
+
+<!-- ══ ARTICLE RADIO GROUP ══ -->
+<input type="radio" name="art" id="a0" checked>
+<input type="radio" name="art" id="a1">
+<input type="radio" name="art" id="a2">
+<input type="radio" name="art" id="a3">
+<input type="radio" name="art" id="a4">
+
+<div id="bskh2-inner">
+
+<!-- ════════════ NAVIGATION ════════════ -->
+<nav class="nav">
+  <div class="brand">
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="1" y="1" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
+      <rect x="10" y="1" width="7" height="7" rx="1.5" fill="white" opacity="0.7"/>
+      <rect x="1" y="10" width="7" height="7" rx="1.5" fill="white" opacity="0.7"/>
+      <rect x="10" y="10" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
+    </svg>
+    BSKH
+  </div>
+  <label for="r-home">Home</label>
+  <label for="r-apps">Applications</label>
+  <label for="r-kb">Knowledge Base</label>
+  <label for="r-search" class="nav-right">🔍 Search</label>
+</nav>
+
+<!-- ════════════ HOME PAGE ════════════ -->
+<div id="pg-home" class="page">
+  <div class="hero">
+    <div class="hero-label">IT Business Systems Team</div>
+    <h1 class="hero-title">Business Systems <strong>Knowledge Hub</strong></h1>
+    <p class="hero-sub">Find documentation, support contacts and ownership details for every Business Systems application.</p>
+    <div class="hero-search">
+      <div class="hero-search-wrap">
+        <span class="hero-search-icon">🔍</span>
+        <input class="hero-search-box" type="text" placeholder="Search applications, guides, documentation…">
+      </div>
+      <label for="r-search" class="hero-search-btn" style="display:inline-flex;align-items:center;cursor:pointer;">Search</label>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="stat-n">3</span><span class="stat-l">Applications</span></div>
+      <div class="stat"><span class="stat-n">2</span><span class="stat-l">Active</span></div>
+      <div class="stat"><span class="stat-n">4</span><span class="stat-l">KB Articles</span></div>
+      <div class="stat"><span class="stat-n">3</span><span class="stat-l">Contacts</span></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="two-col">
+      <div>
+
+        <!-- Browse by Category -->
+        <div class="section">
+          <div class="section-hd"><h2 class="section-title"><span>🗂</span> Browse by Category</h2></div>
+          <div class="cat-grid">
+            <label for="r-apps" class="cat-card">
+              <span class="chip cc-student">Student Systems</span>
+              <span class="cat-n">1</span><span class="cat-s">application</span>
+            </label>
+            <label for="r-apps" class="cat-card">
+              <span class="chip cc-analytics">Analytics &amp; Reporting</span>
+              <span class="cat-n">1</span><span class="cat-s">application</span>
+            </label>
+            <label for="r-apps" class="cat-card">
+              <span class="chip cc-facilities">Facilities Management</span>
+              <span class="cat-n">1</span><span class="cat-s">application</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Recently Updated -->
+        <div class="section">
+          <div class="section-hd">
+            <h2 class="section-title"><span>🕐</span> Recently Updated</h2>
+            <label for="r-apps" class="view-all">View all</label>
+          </div>
+          <div class="app-grid">
+            <!-- StarRez card -->
+            <label for="d1" class="app-card">
+              <div class="card-hd"><div class="card-icon">🏠</div><div class="card-tg"><div class="card-title">StarRez</div><span class="chip cc-student">Student Systems</span></div></div>
+              <p class="card-desc">Student residency management system handling hall applications, allocations, contracts, and billing for all university-managed accommodation.</p>
+              <div class="card-owners">
+                <div class="owner-row"><span class="owner-lbl">Business</span>Sarah Mitchell</div>
+                <div class="owner-row"><span class="owner-lbl">Technical</span>James Okafor</div>
+                <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems</div>
+              </div>
+              <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 1 May 2026</span></div>
+            </label>
+            <!-- Evolution card -->
+            <label for="d2" class="app-card">
+              <div class="card-hd"><div class="card-icon">🔧</div><div class="card-tg"><div class="card-title">Evolution (MRI)</div><span class="chip cc-facilities">Facilities Management</span></div></div>
+              <p class="card-desc">Property and facilities management system for maintenance work orders, asset register, PPM and contractor management across all university estates.</p>
+              <div class="card-owners">
+                <div class="owner-row"><span class="owner-lbl">Business</span>David Thornton</div>
+                <div class="owner-row"><span class="owner-lbl">Technical</span>James Okafor</div>
+                <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems</div>
+              </div>
+              <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 15 Apr 2026</span></div>
+            </label>
+            <!-- QlikView card -->
+            <label for="d3" class="app-card">
+              <div class="card-hd"><div class="card-icon">📊</div><div class="card-tg"><div class="card-title">QlikView</div><span class="chip cc-analytics">Analytics &amp; Reporting</span></div></div>
+              <p class="card-desc">Business intelligence and data visualisation platform providing interactive dashboards and operational reports to senior leadership and managers.</p>
+              <div class="card-owners">
+                <div class="owner-row"><span class="owner-lbl">Business</span>Dr. Priya Sharma</div>
+                <div class="owner-row"><span class="owner-lbl">Technical</span>Calbert Williams</div>
+                <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems &amp; Data</div>
+              </div>
+              <div class="card-ft"><span class="badge bs-review">🟡 Under Review</span><span class="card-ts">Reviewed 20 Mar 2026</span></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Popular -->
+        <div class="section">
+          <div class="section-hd"><h2 class="section-title"><span>⭐</span> Popular Applications</h2></div>
+          <label for="d1" class="pop-row"><span class="pop-n">1</span><span class="pop-icon">🏠</span><span class="pop-name">StarRez</span><span class="chip cc-student">Student Systems</span><span class="badge bs-active">🟢 Active</span></label>
+          <label for="d2" class="pop-row"><span class="pop-n">2</span><span class="pop-icon">🔧</span><span class="pop-name">Evolution (MRI)</span><span class="chip cc-facilities">Facilities Management</span><span class="badge bs-active">🟢 Active</span></label>
+          <label for="d3" class="pop-row"><span class="pop-n">3</span><span class="pop-icon">📊</span><span class="pop-name">QlikView</span><span class="chip cc-analytics">Analytics &amp; Reporting</span><span class="badge bs-review">🟡 Under Review</span></label>
+        </div>
+
+        <!-- Featured KB -->
+        <div class="section">
+          <div class="section-hd">
+            <h2 class="section-title"><span>📚</span> Featured Knowledge Articles</h2>
+            <label for="r-kb" class="view-all">View all</label>
+          </div>
+          <div class="kb-list">
+            <label for="a1" class="kb-card">
+              <span class="chip kc-howto">How-to</span>
+              <div class="kb-title">How to Reset Your StarRez Password</div>
+              <div class="kb-meta"><span>📱 StarRez</span><span>👤 James Okafor</span><span>⏱ 3 min read</span></div>
+              <div class="tag-list"><span class="tag">password</span><span class="tag">reset</span><span class="tag">SSO</span></div>
+            </label>
+            <label for="a3" class="kb-card">
+              <span class="chip kc-trouble">Troubleshooting</span>
+              <div class="kb-title">QlikView Dashboard Not Loading — Troubleshooting Guide</div>
+              <div class="kb-meta"><span>📱 QlikView</span><span>👤 Calbert Williams</span><span>⏱ 4 min read</span></div>
+              <div class="tag-list"><span class="tag">QlikView</span><span class="tag">dashboard</span><span class="tag">error</span></div>
+            </label>
+          </div>
+        </div>
+
+      </div><!-- /left col -->
+
+      <!-- Sidebar -->
+      <div>
+        <div class="sidebar-card">
+          <div class="sidebar-title">⚡ Quick Links</div>
+          <a class="qlink" href="#">IT Service Desk</a>
+          <a class="qlink" href="#">Request New Application</a>
+          <a class="qlink" href="https://myaru.sharepoint.com" target="_blank">SharePoint Admin Centre</a>
+          <a class="qlink" href="https://portal.office.com" target="_blank">Microsoft 365 Portal</a>
+          <a class="qlink" href="#">Azure AD (Entra)</a>
+          <a class="qlink" href="#">ITSM Tool</a>
+        </div>
+        <div class="sidebar-card">
+          <div class="sidebar-title">👥 Support Contacts</div>
+          <div class="contact-row">
+            <div class="avatar">JO</div>
+            <div><div class="cname">James Okafor</div><div class="crole">IT Business Systems Analyst</div><a class="cemail" href="mailto:j.okafor@university.ac.uk">j.okafor@university.ac.uk</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="avatar">CW</div>
+            <div><div class="cname">Calbert Williams</div><div class="crole">Senior Data Analyst</div><a class="cemail" href="mailto:c.williams@university.ac.uk">c.williams@university.ac.uk</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="avatar" style="background:#8A6914">MK</div>
+            <div><div class="cname">Maria Kovacs <span class="esc-badge">Escalation</span></div><div class="crole">IT Business Systems Manager</div><a class="cemail" href="mailto:m.kovacs@university.ac.uk">m.kovacs@university.ac.uk</a></div>
+          </div>
+        </div>
+        <div class="callout">
+          <span style="font-size:18px;flex-shrink:0">ℹ️</span>
+          <div><strong>Out of hours?</strong> For urgent P1 issues call: <strong>01234 999 000</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /pg-home -->
+
+<!-- ════════════ APPS PAGE ════════════ -->
+<div id="pg-apps" class="page">
+  <div class="content">
+    <h1 class="page-title">📦 Application Register</h1>
+    <p class="page-sub">3 applications registered · 2 active</p>
+    <div class="app-grid">
+      <label for="d1" class="app-card">
+        <div class="card-hd"><div class="card-icon">🏠</div><div class="card-tg"><div class="card-title">StarRez</div><span class="chip cc-student">Student Systems</span></div></div>
+        <p class="card-desc">Student residency management system handling hall applications, allocations, contracts, and billing for all university-managed accommodation.</p>
+        <div class="card-owners">
+          <div class="owner-row"><span class="owner-lbl">Business</span>Sarah Mitchell</div>
+          <div class="owner-row"><span class="owner-lbl">Technical</span>James Okafor</div>
+          <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems</div>
+        </div>
+        <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 1 May 2026</span></div>
+      </label>
+      <label for="d2" class="app-card">
+        <div class="card-hd"><div class="card-icon">🔧</div><div class="card-tg"><div class="card-title">Evolution (MRI)</div><span class="chip cc-facilities">Facilities Management</span></div></div>
+        <p class="card-desc">Property and facilities management system for maintenance work orders, asset register, PPM and contractor management across all university estates.</p>
+        <div class="card-owners">
+          <div class="owner-row"><span class="owner-lbl">Business</span>David Thornton</div>
+          <div class="owner-row"><span class="owner-lbl">Technical</span>James Okafor</div>
+          <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems</div>
+        </div>
+        <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 15 Apr 2026</span></div>
+      </label>
+      <label for="d3" class="app-card">
+        <div class="card-hd"><div class="card-icon">📊</div><div class="card-tg"><div class="card-title">QlikView</div><span class="chip cc-analytics">Analytics &amp; Reporting</span></div></div>
+        <p class="card-desc">Business intelligence and data visualisation platform providing interactive dashboards and operational reports to senior leadership and managers.</p>
+        <div class="card-owners">
+          <div class="owner-row"><span class="owner-lbl">Business</span>Dr. Priya Sharma</div>
+          <div class="owner-row"><span class="owner-lbl">Technical</span>Calbert Williams</div>
+          <div class="owner-row"><span class="owner-lbl">Support</span>IT Business Systems &amp; Data</div>
+        </div>
+        <div class="card-ft"><span class="badge bs-review">🟡 Under Review</span><span class="card-ts">Reviewed 20 Mar 2026</span></div>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ APP DETAIL PANELS ════════════ -->
+<!-- These appear over the apps page when a card is clicked -->
+<div id="det1" class="det-panel">
+  <div class="det-hero">
+    <label for="r-apps" class="back-btn">← Back to Applications</label>
+    <div class="det-app-hd">
+      <div class="det-icon">🏠</div>
+      <div>
+        <div class="det-title">StarRez</div>
+        <div class="det-desc">Student residency management system handling hall applications, allocations, contracts, and billing for all university-managed accommodation.</div>
+        <div class="det-meta"><span class="badge bs-active">🟢 Active</span><span>📂 Student Systems</span><span>🏢 StarRez Inc</span><span>🔑 SSO (Azure AD)</span></div>
+      </div>
+    </div>
+  </div>
+  <!-- StarRez tab inputs -->
+  <input type="radio" name="tabs1" id="t1a" checked>
+  <input type="radio" name="tabs1" id="t1b">
+  <input type="radio" name="tabs1" id="t1c">
+  <input type="radio" name="tabs1" id="t1d">
+  <div class="det-tabs">
+    <div class="tab-bar">
+      <label for="t1a">Overview</label>
+      <label for="t1b">Support</label>
+      <label for="t1c">Documentation</label>
+      <label for="t1d">Change History</label>
+    </div>
+    <div class="content">
+      <div id="tc1a" class="tab-content">
+        <div class="info-grid">
+          <div class="info-block"><div class="info-lbl">Business Owner</div><div class="info-val">👤 Sarah Mitchell</div></div>
+          <div class="info-block"><div class="info-lbl">Technical Owner</div><div class="info-val">🔧 James Okafor</div></div>
+          <div class="info-block"><div class="info-lbl">Support Team</div><div class="info-val">📧 IT Business Systems</div></div>
+          <div class="info-block"><div class="info-lbl">Vendor</div><div class="info-val">StarRez Inc</div></div>
+          <div class="info-block"><div class="info-lbl">Authentication</div><div class="info-val">🔑 SSO (Azure AD)</div></div>
+          <div class="info-block"><div class="info-lbl">Last Reviewed</div><div class="info-val">📅 1 May 2026</div></div>
+        </div>
+        <div class="ccard"><div class="ccard-title">📋 Purpose</div><p>StarRez manages the full lifecycle of student accommodation from initial application through to departure, including contract management, room allocation, billing integration and incident management.</p></div>
+        <div class="ccard"><div class="ccard-title">🔄 Business Process</div><p>Students apply online → Offers generated by accommodation team → Contracts issued electronically → Check-in managed on arrival day → Billing posted to student account → Departure processed and deposit reconciled.</p></div>
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">🔗 Integrations</div><p>Azure AD (SSO), Student Records System (REST API), Finance System (nightly billing extract), SharePoint (document management)</p></div>
+          <div class="ccard"><div class="ccard-title">🔀 Linked Systems</div><p>Student Information System, Finance Ledger, Azure Active Directory, Document Management</p></div>
+        </div>
+        <div class="warn-box"><div class="warn-title">⚠️ Known Issues</div><p>Bulk email occasionally queues during peak intake (September/January). Workaround: stagger sends to batches of 500. Fix expected in v2024.3.</p></div>
+        <div class="tag-list" style="margin-top:8px"><span class="tag">accommodation</span><span class="tag">residency</span><span class="tag">student</span><span class="tag">contracts</span><span class="tag">billing</span></div>
+      </div>
+      <div id="tc1b" class="tab-content">
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">📧 Contact</div>
+            <div class="info-lbl" style="margin-top:8px">Support Email</div>
+            <a href="mailto:businesssystems@university.ac.uk" style="color:#0078D4;font-size:14px">businesssystems@university.ac.uk</a>
+            <div class="info-lbl" style="margin-top:14px">Support Team</div>
+            <p style="font-size:14px">IT Business Systems</p>
+          </div>
+          <div class="ccard"><div class="ccard-title">👥 Team Contacts</div>
+            <div class="contact-row"><div class="avatar">JO</div><div><div class="cname">James Okafor</div><div class="crole">IT Business Systems Analyst</div><a class="cemail" href="mailto:j.okafor@university.ac.uk">j.okafor@university.ac.uk</a></div></div>
+            <div class="contact-row"><div class="avatar" style="background:#8A6914">MK</div><div><div class="cname">Maria Kovacs <span class="esc-badge">Escalation</span></div><div class="crole">IT Business Systems Manager</div><a class="cemail" href="mailto:m.kovacs@university.ac.uk">m.kovacs@university.ac.uk</a></div></div>
+          </div>
+        </div>
+        <div class="callout"><span style="font-size:18px;flex-shrink:0">ℹ️</span><span>For urgent production issues, raise a P1 ticket in the ITSM tool and call <strong>01234 999 000</strong>.</span></div>
+      </div>
+      <div id="tc1c" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📄 Useful Links</div>
+          <a class="ulink" href="https://support.starrez.com" target="_blank">StarRez Support Portal</a>
+          <a class="ulink" href="#" target="_blank">StarRez Community</a>
+          <a class="ulink" href="#" target="_blank">Vendor Documentation</a>
+        </div>
+        <div class="ccard"><div class="ccard-title">📁 Documentation Library</div>
+          <p style="margin-bottom:16px;font-size:14px">Application documents, user guides and release notes are stored in SharePoint.</p>
+          <a href="https://myaru.sharepoint.com/sites/OU-100665/Shared%20Documents" class="docs-btn" target="_blank">Open Documentation Library →</a>
+        </div>
+      </div>
+      <div id="tc1d" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📜 Change History</div>
+          <div class="change-entry"><div class="ch-date">10 Apr 2026</div><div style="flex:1"><div class="ch-title">Upgraded to StarRez v2024.2</div><div class="ch-badges"><span class="type-b">Upgrade</span><span class="imp-med">Medium impact</span><span style="font-size:12px;color:#A19F9D">by James Okafor</span></div><div class="ch-detail">Annual platform upgrade. Key changes: improved bulk email throttling, new API endpoints for room swaps, accessibility improvements to student portal.</div></div></div>
+          <div class="change-entry"><div class="ch-date">14 Feb 2026</div><div style="flex:1"><div class="ch-title">SSO integration updated for MFA policy change</div><div class="ch-badges"><span class="type-b">Config</span><span class="imp-high">High impact</span><span style="font-size:12px;color:#A19F9D">by James Okafor</span></div><div class="ch-detail">Azure AD conditional access policy updated to require MFA for all admin users. StarRez SAML configuration updated accordingly.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /det1 -->
+
+<div id="det2" class="det-panel">
+  <div class="det-hero">
+    <label for="r-apps" class="back-btn">← Back to Applications</label>
+    <div class="det-app-hd">
+      <div class="det-icon">🔧</div>
+      <div>
+        <div class="det-title">Evolution (MRI)</div>
+        <div class="det-desc">Property and facilities management system for maintenance work orders, asset register, PPM and contractor management across all university estates.</div>
+        <div class="det-meta"><span class="badge bs-active">🟢 Active</span><span>📂 Facilities Management</span><span>🏢 MRI Software</span><span>🔑 Local + MFA</span></div>
+      </div>
+    </div>
+  </div>
+  <input type="radio" name="tabs2" id="t2a" checked>
+  <input type="radio" name="tabs2" id="t2b">
+  <input type="radio" name="tabs2" id="t2c">
+  <input type="radio" name="tabs2" id="t2d">
+  <div class="det-tabs">
+    <div class="tab-bar">
+      <label for="t2a">Overview</label>
+      <label for="t2b">Support</label>
+      <label for="t2c">Documentation</label>
+      <label for="t2d">Change History</label>
+    </div>
+    <div class="content">
+      <div id="tc2a" class="tab-content">
+        <div class="info-grid">
+          <div class="info-block"><div class="info-lbl">Business Owner</div><div class="info-val">👤 David Thornton</div></div>
+          <div class="info-block"><div class="info-lbl">Technical Owner</div><div class="info-val">🔧 James Okafor</div></div>
+          <div class="info-block"><div class="info-lbl">Support Team</div><div class="info-val">📧 IT Business Systems</div></div>
+          <div class="info-block"><div class="info-lbl">Vendor</div><div class="info-val">MRI Software</div></div>
+          <div class="info-block"><div class="info-lbl">Authentication</div><div class="info-val">🔑 Local (MRI credentials) + MFA</div></div>
+          <div class="info-block"><div class="info-lbl">Last Reviewed</div><div class="info-val">📅 15 Apr 2026</div></div>
+        </div>
+        <div class="ccard"><div class="ccard-title">📋 Purpose</div><p>Evolution provides Estates and Facilities with a single integrated system for logging, assigning and tracking maintenance work orders across all university buildings and managed assets.</p></div>
+        <div class="ccard"><div class="ccard-title">🔄 Business Process</div><p>Fault reported by staff/student → Work order created in Evolution → Assigned to engineer or contractor → Work completed and signed off → QA check by supervisor → Work order closed.</p></div>
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">🔗 Integrations</div><p>Contractor self-service portal (web), Finance (PO integration via XML), Building Management System (automated alert creation), Mobile workforce app</p></div>
+          <div class="ccard"><div class="ccard-title">🔀 Linked Systems</div><p>Finance Purchase Ledger, Building Management System (BMS), Contractor Self-Service Portal, Evolution Mobile App</p></div>
+        </div>
+        <div class="warn-box"><div class="warn-title">⚠️ Known Issues</div><p>Scheduled report exports occasionally time out for date ranges exceeding 12 months. Workaround: export in quarterly segments.</p></div>
+        <div class="tag-list" style="margin-top:8px"><span class="tag">facilities</span><span class="tag">maintenance</span><span class="tag">estates</span><span class="tag">PPM</span><span class="tag">assets</span></div>
+      </div>
+      <div id="tc2b" class="tab-content">
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">📧 Contact</div>
+            <div class="info-lbl" style="margin-top:8px">Support Email</div>
+            <a href="mailto:businesssystems@university.ac.uk" style="color:#0078D4;font-size:14px">businesssystems@university.ac.uk</a>
+            <div class="info-lbl" style="margin-top:14px">Support Team</div>
+            <p style="font-size:14px">IT Business Systems</p>
+          </div>
+          <div class="ccard"><div class="ccard-title">👥 Team Contacts</div>
+            <div class="contact-row"><div class="avatar">JO</div><div><div class="cname">James Okafor</div><div class="crole">IT Business Systems Analyst</div><a class="cemail" href="mailto:j.okafor@university.ac.uk">j.okafor@university.ac.uk</a></div></div>
+            <div class="contact-row"><div class="avatar" style="background:#8A6914">MK</div><div><div class="cname">Maria Kovacs <span class="esc-badge">Escalation</span></div><div class="crole">IT Business Systems Manager</div><a class="cemail" href="mailto:m.kovacs@university.ac.uk">m.kovacs@university.ac.uk</a></div></div>
+          </div>
+        </div>
+        <div class="callout"><span style="font-size:18px;flex-shrink:0">ℹ️</span><span>For urgent production issues, raise a P1 ticket in the ITSM tool and call <strong>01234 999 000</strong>.</span></div>
+      </div>
+      <div id="tc2c" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📄 Useful Links</div>
+          <a class="ulink" href="https://www.mrisoftware.com/support" target="_blank">MRI Software Support</a>
+          <a class="ulink" href="#" target="_blank">Evolution User Community</a>
+        </div>
+        <div class="ccard"><div class="ccard-title">📁 Documentation Library</div>
+          <p style="margin-bottom:16px;font-size:14px">Application documents, user guides and release notes are stored in SharePoint.</p>
+          <a href="https://myaru.sharepoint.com/sites/OU-100665/Shared%20Documents" class="docs-btn" target="_blank">Open Documentation Library →</a>
+        </div>
+      </div>
+      <div id="tc2d" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📜 Change History</div>
+          <div class="change-entry"><div class="ch-date">1 Mar 2026</div><div style="flex:1"><div class="ch-title">PPM schedule reconfigured for new buildings</div><div class="ch-badges"><span class="type-b">Config</span><span class="imp-low">Low impact</span><span style="font-size:12px;color:#A19F9D">by James Okafor</span></div><div class="ch-detail">Added 3 new buildings to PPM schedules following completion of the Science Block extension. Contractor assignments updated.</div></div></div>
+          <div class="change-entry"><div class="ch-date">20 Jan 2026</div><div style="flex:1"><div class="ch-title">Finance PO integration — bug fix for duplicate POs</div><div class="ch-badges"><span class="type-b">Bug Fix</span><span class="imp-high">High impact</span><span style="font-size:12px;color:#A19F9D">by James Okafor</span></div><div class="ch-detail">Resolved an issue where duplicate purchase orders were being generated for multi-stage work orders. Hotfix applied by MRI Software.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /det2 -->
+
+<div id="det3" class="det-panel">
+  <div class="det-hero">
+    <label for="r-apps" class="back-btn">← Back to Applications</label>
+    <div class="det-app-hd">
+      <div class="det-icon">📊</div>
+      <div>
+        <div class="det-title">QlikView</div>
+        <div class="det-desc">Business intelligence and data visualisation platform providing interactive dashboards and operational reports to senior leadership and departmental managers.</div>
+        <div class="det-meta"><span class="badge bs-review">🟡 Under Review</span><span>📂 Analytics &amp; Reporting</span><span>🏢 Qlik Technologies</span><span>🔑 SSO (Azure AD)</span></div>
+      </div>
+    </div>
+  </div>
+  <input type="radio" name="tabs3" id="t3a" checked>
+  <input type="radio" name="tabs3" id="t3b">
+  <input type="radio" name="tabs3" id="t3c">
+  <input type="radio" name="tabs3" id="t3d">
+  <div class="det-tabs">
+    <div class="tab-bar">
+      <label for="t3a">Overview</label>
+      <label for="t3b">Support</label>
+      <label for="t3c">Documentation</label>
+      <label for="t3d">Change History</label>
+    </div>
+    <div class="content">
+      <div id="tc3a" class="tab-content">
+        <div class="info-grid">
+          <div class="info-block"><div class="info-lbl">Business Owner</div><div class="info-val">👤 Dr. Priya Sharma</div></div>
+          <div class="info-block"><div class="info-lbl">Technical Owner</div><div class="info-val">🔧 Calbert Williams</div></div>
+          <div class="info-block"><div class="info-lbl">Support Team</div><div class="info-val">📧 IT Business Systems &amp; Data</div></div>
+          <div class="info-block"><div class="info-lbl">Vendor</div><div class="info-val">Qlik Technologies</div></div>
+          <div class="info-block"><div class="info-lbl">Authentication</div><div class="info-val">🔑 SSO (Azure AD)</div></div>
+          <div class="info-block"><div class="info-lbl">Last Reviewed</div><div class="info-val">📅 20 Mar 2026</div></div>
+        </div>
+        <div class="ccard"><div class="ccard-title">📋 Purpose</div><p>QlikView delivers interactive analytical dashboards enabling self-service data exploration across student, finance and operational data. Used by approximately 120 active users across 8 departments.</p></div>
+        <div class="ccard"><div class="ccard-title">🔄 Business Process</div><p>Source data extracted nightly from operational systems → ETL pipeline loads into QlikView data model → Dashboards refreshed → Available to authorised users by 07:00 each working day.</p></div>
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">🔗 Integrations</div><p>University Data Warehouse (ODBC), Student Records (nightly extract), Finance (nightly extract), HR System (monthly extract)</p></div>
+          <div class="ccard"><div class="ccard-title">🔀 Linked Systems</div><p>University Data Warehouse, Student Records System, Finance, HR System</p></div>
+        </div>
+        <div class="warn-box"><div class="warn-title">⚠️ Known Issues</div><p>Legacy platform — migration to Qlik Sense currently under evaluation. Some dashboards rely on deprecated data sources. No new dashboard development until migration decision confirmed.</p></div>
+        <div class="tag-list" style="margin-top:8px"><span class="tag">BI</span><span class="tag">dashboards</span><span class="tag">reporting</span><span class="tag">analytics</span><span class="tag">KPIs</span></div>
+      </div>
+      <div id="tc3b" class="tab-content">
+        <div class="two-col-d">
+          <div class="ccard"><div class="ccard-title">📧 Contact</div>
+            <div class="info-lbl" style="margin-top:8px">Support Email</div>
+            <a href="mailto:data@university.ac.uk" style="color:#0078D4;font-size:14px">data@university.ac.uk</a>
+            <div class="info-lbl" style="margin-top:14px">Support Team</div>
+            <p style="font-size:14px">IT Business Systems &amp; Data Team</p>
+          </div>
+          <div class="ccard"><div class="ccard-title">👥 Team Contacts</div>
+            <div class="contact-row"><div class="avatar">CW</div><div><div class="cname">Calbert Williams</div><div class="crole">Senior Data Analyst</div><a class="cemail" href="mailto:c.williams@university.ac.uk">c.williams@university.ac.uk</a></div></div>
+            <div class="contact-row"><div class="avatar" style="background:#8A6914">MK</div><div><div class="cname">Maria Kovacs <span class="esc-badge">Escalation</span></div><div class="crole">IT Business Systems Manager</div><a class="cemail" href="mailto:m.kovacs@university.ac.uk">m.kovacs@university.ac.uk</a></div></div>
+          </div>
+        </div>
+        <div class="callout"><span style="font-size:18px;flex-shrink:0">ℹ️</span><span>For urgent production issues, raise a P1 ticket in the ITSM tool and call <strong>01234 999 000</strong>.</span></div>
+      </div>
+      <div id="tc3c" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📄 Useful Links</div>
+          <a class="ulink" href="https://help.qlik.com" target="_blank">Qlik Help Portal</a>
+          <a class="ulink" href="#" target="_blank">Qlik Community</a>
+          <a class="ulink" href="#" target="_blank">Internal Dashboard Catalogue</a>
+        </div>
+        <div class="ccard"><div class="ccard-title">📁 Documentation Library</div>
+          <p style="margin-bottom:16px;font-size:14px">Application documents, user guides and release notes are stored in SharePoint.</p>
+          <a href="https://myaru.sharepoint.com/sites/OU-100665/Shared%20Documents" class="docs-btn" target="_blank">Open Documentation Library →</a>
+        </div>
+      </div>
+      <div id="tc3d" class="tab-content">
+        <div class="ccard"><div class="ccard-title">📜 Change History</div>
+          <div class="change-entry"><div class="ch-date">28 Feb 2026</div><div style="flex:1"><div class="ch-title">New HR dashboard published</div><div class="ch-badges"><span class="type-b">Enhancement</span><span class="imp-low">Low impact</span><span style="font-size:12px;color:#A19F9D">by Calbert Williams</span></div><div class="ch-detail">New HR headcount and turnover dashboard published for HR directorate. Data refreshes monthly from HR extract.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /det3 -->
+
+<!-- ════════════ KB PAGE ════════════ -->
+<div id="pg-kb" class="page">
+  <div class="content">
+    <h1 class="page-title">📚 Knowledge Base</h1>
+    <p class="page-sub">4 published articles across 3 applications</p>
+    <div class="kb-list">
+      <label for="a1" class="kb-card">
+        <span class="chip kc-howto">How-to</span>
+        <div class="kb-title">How to Reset Your StarRez Password</div>
+        <div class="kb-meta"><span>📱 StarRez</span><span>👤 James Okafor</span><span>📅 10 May 2026</span><span>⏱ 3 min read</span></div>
+        <div class="tag-list"><span class="tag">password</span><span class="tag">reset</span><span class="tag">login</span><span class="tag">SSO</span></div>
+      </label>
+      <label for="a2" class="kb-card">
+        <span class="chip kc-howto">How-to</span>
+        <div class="kb-title">Raising a Maintenance Work Order in Evolution</div>
+        <div class="kb-meta"><span>📱 Evolution (MRI)</span><span>👤 James Okafor</span><span>📅 22 Apr 2026</span><span>⏱ 5 min read</span></div>
+        <div class="tag-list"><span class="tag">work order</span><span class="tag">maintenance</span><span class="tag">fault</span><span class="tag">evolution</span></div>
+      </label>
+      <label for="a3" class="kb-card">
+        <span class="chip kc-trouble">Troubleshooting</span>
+        <div class="kb-title">QlikView Dashboard Not Loading — Troubleshooting Guide</div>
+        <div class="kb-meta"><span>📱 QlikView</span><span>👤 Calbert Williams</span><span>📅 28 Mar 2026</span><span>⏱ 4 min read</span></div>
+        <div class="tag-list"><span class="tag">QlikView</span><span class="tag">dashboard</span><span class="tag">loading</span><span class="tag">error</span></div>
+      </label>
+      <label for="a4" class="kb-card">
+        <span class="chip kc-news">News</span>
+        <div class="kb-title">QlikView to Qlik Sense Migration — What You Need to Know</div>
+        <div class="kb-meta"><span>📱 QlikView</span><span>👤 Dr. Priya Sharma</span><span>📅 5 May 2026</span><span>⏱ 3 min read</span></div>
+        <div class="tag-list"><span class="tag">QlikView</span><span class="tag">Qlik Sense</span><span class="tag">migration</span><span class="tag">news</span></div>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ARTICLE PANELS ════════════ -->
+<div id="art1" class="art-panel">
+  <div class="content">
+    <label for="r-kb" class="back-btn2">← Back to Knowledge Base</label>
+    <div style="max-width:800px">
+      <span class="chip kc-howto" style="margin-bottom:14px;display:inline-block">How-to</span>
+      <h1 style="font-size:26px;font-weight:700;margin:0 0 12px;color:#323130">How to Reset Your StarRez Password</h1>
+      <div class="kb-meta" style="margin-bottom:28px"><span>📱 StarRez</span><span>👤 James Okafor</span><span>📅 10 May 2026</span><span>⏱ 3 min read</span></div>
+      <div class="article">
+        <h2>Overview</h2>
+        <p>StarRez uses Single Sign-On (SSO) via your university Microsoft 365 account. Your StarRez password is the same as your university network password.</p>
+        <h2>Steps</h2>
+        <ol><li>Visit <strong>aka.ms/sspr</strong> to reset your university password.</li><li>Follow the self-service password reset prompts.</li><li>Once reset, return to StarRez and log in with your new credentials.</li></ol>
+        <h2>Still Locked Out?</h2>
+        <p>Contact the IT Service Desk on ext. 1234 or email servicedesk@university.ac.uk.</p>
+      </div>
+      <div style="margin-top:20px"><div class="info-lbl" style="margin-bottom:8px">Tags</div><div class="tag-list"><span class="tag">password</span><span class="tag">reset</span><span class="tag">login</span><span class="tag">SSO</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="art2" class="art-panel">
+  <div class="content">
+    <label for="r-kb" class="back-btn2">← Back to Knowledge Base</label>
+    <div style="max-width:800px">
+      <span class="chip kc-howto" style="margin-bottom:14px;display:inline-block">How-to</span>
+      <h1 style="font-size:26px;font-weight:700;margin:0 0 12px;color:#323130">Raising a Maintenance Work Order in Evolution</h1>
+      <div class="kb-meta" style="margin-bottom:28px"><span>📱 Evolution (MRI)</span><span>👤 James Okafor</span><span>📅 22 Apr 2026</span><span>⏱ 5 min read</span></div>
+      <div class="article">
+        <h2>Overview</h2>
+        <p>Any member of staff can raise a maintenance work order in Evolution. This guide walks you through the process.</p>
+        <h2>Steps</h2>
+        <ol><li>Log in to Evolution at <strong>evolution.university.ac.uk</strong>.</li><li>Click <strong>New Work Order</strong> from the dashboard.</li><li>Select the affected building and location from the drop-down menus.</li><li>Describe the fault clearly in the description field.</li><li>Select the category (Electrical, Plumbing, General, etc.).</li><li>Attach a photo if helpful.</li><li>Click <strong>Submit</strong>.</li></ol>
+        <p>You will receive an email confirmation with a work order reference number.</p>
+      </div>
+      <div style="margin-top:20px"><div class="info-lbl" style="margin-bottom:8px">Tags</div><div class="tag-list"><span class="tag">work order</span><span class="tag">maintenance</span><span class="tag">fault</span><span class="tag">evolution</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="art3" class="art-panel">
+  <div class="content">
+    <label for="r-kb" class="back-btn2">← Back to Knowledge Base</label>
+    <div style="max-width:800px">
+      <span class="chip kc-trouble" style="margin-bottom:14px;display:inline-block">Troubleshooting</span>
+      <h1 style="font-size:26px;font-weight:700;margin:0 0 12px;color:#323130">QlikView Dashboard Not Loading — Troubleshooting Guide</h1>
+      <div class="kb-meta" style="margin-bottom:28px"><span>📱 QlikView</span><span>👤 Calbert Williams</span><span>📅 28 Mar 2026</span><span>⏱ 4 min read</span></div>
+      <div class="article">
+        <h2>Symptoms</h2>
+        <ul><li>Dashboard shows blank / spinning wheel</li><li>Error: "Could not connect to QlikView server"</li><li>Login page loops without authenticating</li></ul>
+        <h2>Resolution Steps</h2>
+        <ol><li><strong>Clear your browser cache</strong> — Ctrl+Shift+Delete → Cached images and files → Clear.</li><li><strong>Try a different browser</strong> — QlikView is optimised for Chrome and Edge.</li><li><strong>Check system status</strong> — data@university.ac.uk sends a notification if QlikView is offline.</li><li><strong>VPN</strong> — If working remotely, ensure you are connected to the university VPN.</li></ol>
+        <h2>Escalation</h2>
+        <p>If none of the above resolve your issue, email <strong>data@university.ac.uk</strong> with your dashboard name and a screenshot of any error message.</p>
+      </div>
+      <div style="margin-top:20px"><div class="info-lbl" style="margin-bottom:8px">Tags</div><div class="tag-list"><span class="tag">QlikView</span><span class="tag">dashboard</span><span class="tag">loading</span><span class="tag">error</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="art4" class="art-panel">
+  <div class="content">
+    <label for="r-kb" class="back-btn2">← Back to Knowledge Base</label>
+    <div style="max-width:800px">
+      <span class="chip kc-news" style="margin-bottom:14px;display:inline-block">News</span>
+      <h1 style="font-size:26px;font-weight:700;margin:0 0 12px;color:#323130">QlikView to Qlik Sense Migration — What You Need to Know</h1>
+      <div class="kb-meta" style="margin-bottom:28px"><span>📱 QlikView</span><span>👤 Dr. Priya Sharma</span><span>📅 5 May 2026</span><span>⏱ 3 min read</span></div>
+      <div class="article">
+        <h2>Background</h2>
+        <p>The IT Business Systems and Data teams are evaluating a migration from QlikView to Qlik Sense. This article summarises the current position and what it means for users.</p>
+        <h2>Current Status</h2>
+        <p>A business case is being prepared. No migration date has been confirmed. Existing QlikView dashboards remain fully operational.</p>
+        <h2>What Changes?</h2>
+        <p>Qlik Sense offers a modern, browser-based interface with improved mobile support and self-service analytics capabilities. Your existing dashboards will be migrated and should look broadly similar.</p>
+        <h2>Questions?</h2>
+        <p>Contact the Data team at <strong>data@university.ac.uk</strong> with any queries.</p>
+      </div>
+      <div style="margin-top:20px"><div class="info-lbl" style="margin-bottom:8px">Tags</div><div class="tag-list"><span class="tag">QlikView</span><span class="tag">Qlik Sense</span><span class="tag">migration</span><span class="tag">news</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SEARCH PAGE ════════════ -->
+<div id="pg-search" class="page">
+  <div class="content">
+    <h1 class="page-title">🔍 Search</h1>
+    <p class="page-sub">Click any application below to view its full details.</p>
+    <div class="app-grid">
+      <label for="d1" class="app-card">
+        <div class="card-hd"><div class="card-icon">🏠</div><div class="card-tg"><div class="card-title">StarRez</div><span class="chip cc-student">Student Systems</span></div></div>
+        <p class="card-desc">Student residency management system handling hall applications, allocations, contracts, and billing for all university-managed accommodation.</p>
+        <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 1 May 2026</span></div>
+      </label>
+      <label for="d2" class="app-card">
+        <div class="card-hd"><div class="card-icon">🔧</div><div class="card-tg"><div class="card-title">Evolution (MRI)</div><span class="chip cc-facilities">Facilities Management</span></div></div>
+        <p class="card-desc">Property and facilities management system for maintenance work orders, asset register, PPM and contractor management across all university estates.</p>
+        <div class="card-ft"><span class="badge bs-active">🟢 Active</span><span class="card-ts">Reviewed 15 Apr 2026</span></div>
+      </label>
+      <label for="d3" class="app-card">
+        <div class="card-hd"><div class="card-icon">📊</div><div class="card-tg"><div class="card-title">QlikView</div><span class="chip cc-analytics">Analytics &amp; Reporting</span></div></div>
+        <p class="card-desc">Business intelligence and data visualisation platform providing interactive dashboards and operational reports to senior leadership and managers.</p>
+        <div class="card-ft"><span class="badge bs-review">🟡 Under Review</span><span class="card-ts">Reviewed 20 Mar 2026</span></div>
+      </label>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>Business Systems Knowledge Hub · IT Business Systems Team · 2026</span>
+  <span>Built on Microsoft SharePoint Online</span>
+</footer>
+
+</div><!-- /#bskh2-inner -->
+</div><!-- /#bskh2 -->
